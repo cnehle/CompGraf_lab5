@@ -17,58 +17,51 @@
 
         private void InitializeComponent()
         {
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.fractalsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.kochCurveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.treeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip1.SuspendLayout();
+            this.btnTask1 = new System.Windows.Forms.Button();
+            this.btnTask2 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // menuStrip1
+            // btnTask1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fractalsToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(800, 24);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
+            this.btnTask1.Location = new System.Drawing.Point(50, 50);
+            this.btnTask1.Name = "btnTask1";
+            this.btnTask1.Size = new System.Drawing.Size(200, 40);
+            this.btnTask1.TabIndex = 0;
+            this.btnTask1.Text = "1. L-системы (базовые)";
+            this.btnTask1.UseVisualStyleBackColor = true;
+            this.btnTask1.Click += new System.EventHandler(this.btnTask1_Click);
             // 
-            // fractalsToolStripMenuItem
+            // btnTask2
             // 
-            this.fractalsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.kochCurveToolStripMenuItem,
-            this.treeToolStripMenuItem});
-            this.fractalsToolStripMenuItem.Name = "fractalsToolStripMenuItem";
-            this.fractalsToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
-            this.fractalsToolStripMenuItem.Text = "Фракталы";
+            this.btnTask2.Location = new System.Drawing.Point(50, 110);
+            this.btnTask2.Name = "btnTask2";
+            this.btnTask2.Size = new System.Drawing.Size(200, 40);
+            this.btnTask2.TabIndex = 1;
+            this.btnTask2.Text = "2. Фрактальное дерево";
+            this.btnTask2.UseVisualStyleBackColor = true;
+            this.btnTask2.Click += new System.EventHandler(this.btnTask2_Click);
             // 
-            // kochCurveToolStripMenuItem
+            // label1
             // 
-            this.kochCurveToolStripMenuItem.Name = "kochCurveToolStripMenuItem";
-            this.kochCurveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.kochCurveToolStripMenuItem.Text = "Кривая Коха";
-            this.kochCurveToolStripMenuItem.Click += new System.EventHandler(this.kochCurveToolStripMenuItem_Click);
-            // 
-            // treeToolStripMenuItem
-            // 
-            this.treeToolStripMenuItem.Name = "treeToolStripMenuItem";
-            this.treeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.treeToolStripMenuItem.Text = "Дерево";
-            this.treeToolStripMenuItem.Click += new System.EventHandler(this.treeToolStripMenuItem_Click);
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(30, 15);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(240, 20);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Фракталы - L-системы";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 600);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
+            this.ClientSize = new System.Drawing.Size(300, 180);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.btnTask2);
+            this.Controls.Add(this.btnTask1);
             this.Name = "Form1";
-            this.Text = "L-системы - Фракталы";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.Text = "Главное меню";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -76,9 +69,8 @@
 
         #endregion
 
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem fractalsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem kochCurveToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem treeToolStripMenuItem;
+        private System.Windows.Forms.Button btnTask1;
+        private System.Windows.Forms.Button btnTask2;
+        private System.Windows.Forms.Label label1;
     }
 }
