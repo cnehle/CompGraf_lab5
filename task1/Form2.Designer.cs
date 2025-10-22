@@ -98,7 +98,7 @@
             0,
             0});
             this.numIterations.Minimum = new decimal(new int[] {
-            1,
+            0,
             0,
             0,
             0});

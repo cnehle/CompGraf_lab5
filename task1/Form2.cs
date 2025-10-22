@@ -19,6 +19,11 @@ namespace lab5
         private bool useRandomness = false;
         private string loadedLSystem = null;
 
+        // Переменные для фиксированного масштабирования
+        private float baseScaleFactor = 1.0f;
+        private PointF baseCenterOffset;
+        private Size baseClientSize = Size.Empty;
+
         public Form2()
         {
             InitializeComponent();
@@ -40,32 +45,29 @@ namespace lab5
             }
             else
             {
-                string lSystem = "";
-                int iterations = (int)numIterations.Value;
-
-                switch (cmbFractal.SelectedIndex)
-                {
-                    case 0: // Кривая Коха
-                        lSystem = "F 60 0\nF -> F-F++F-F";
-                        break;
-                    case 1: // Квадратный остров Коха
-                        lSystem = "F+F+F+F 90 0\nF -> F+F-F-FF+F+F-F";
-                        break;
-                    case 2: // Кривая дракона
-                        lSystem = "FX 90 0\nF -> F\nX -> X+YF+\nY -> -FX-Y";
-                        break;
-                    case 3: // Куст 1
-                        lSystem = "F 22 90\nF -> FF-[F+F+F]+[+F-F-F]";
-                        break;
-                    case 4: // Снежинка Коха
-                        lSystem = "F++F++F 60 0\nF -> F-F++F-F";
-                        break;
-                }
-
-                ParseLSystem(lSystem, iterations);
+                string lSystem = GetSelectedLSystem();
+                ParseLSystem(lSystem, (int)numIterations.Value);
             }
-            CalculateScaleAndOffset();
+
+            // Сохраняем базовые параметры масштабирования
+            CalculateBaseScaleAndOffset();
+            // Применяем текущее масштабирование
+            ApplyCurrentScale();
+
             this.Invalidate();
+        }
+
+        private string GetSelectedLSystem()
+        {
+            switch (cmbFractal.SelectedIndex)
+            {
+                case 0: return "F 60 0\nF -> F-F++F-F";
+                case 1: return "F+F+F+F 90 0\nF -> F+F-F-FF+F+F-F";
+                case 2: return "FX 90 0\nF -> F\nX -> X+YF+\nY -> -FX-Y";
+                case 3: return "F 22 90\nF -> FF-[F+F+F]+[+F-F-F]";
+                case 4: return "F++F++F 60 0\nF -> F-F++F-F";
+                default: return "F 60 0\nF -> F-F++F-F";
+            }
         }
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -73,6 +75,7 @@ namespace lab5
             points.Clear();
             loadedLSystem = null;
             lblLoadedFile.Text = "Файл не загружен";
+            baseClientSize = Size.Empty;
             this.Invalidate();
         }
 
@@ -91,7 +94,8 @@ namespace lab5
                     lblLoadedFile.Text = "Загружен: " + Path.GetFileName(openFileDialog.FileName);
 
                     ParseLSystem(loadedLSystem, (int)numIterations.Value);
-                    CalculateScaleAndOffset();
+                    CalculateBaseScaleAndOffset();
+                    ApplyCurrentScale();
                     this.Invalidate();
                 }
                 catch (Exception ex)
@@ -236,11 +240,11 @@ namespace lab5
             }
         }
 
-        private void CalculateScaleAndOffset()
+        private void CalculateBaseScaleAndOffset()
         {
             if (points.Count == 0) return;
 
-            // Сначала находим реальные границы всех точек
+            // Находим реальные границы всех точек
             float minX = float.MaxValue, maxX = float.MinValue;
             float minY = float.MaxValue, maxY = float.MinValue;
 
@@ -258,31 +262,83 @@ namespace lab5
             float width = maxX - minX;
             float height = maxY - minY;
 
-            if (width <= 0 || height <= 0)
+            if (width <= 0) width = 1;
+            if (height <= 0) height = 1;
+
+            // Добавляем запас 20%
+            float marginPercent = 0.2f;
+            float marginX = width * marginPercent;
+            float marginY = height * marginPercent;
+
+            minX -= marginX;
+            maxX += marginX;
+            minY -= marginY;
+            maxY += marginY;
+
+            width = maxX - minX;
+            height = maxY - minY;
+
+            // Вычисляем базовый масштаб для размера окна при построении
+            baseClientSize = this.ClientSize;
+            float availableWidth = baseClientSize.Width * 0.9f;
+            float availableHeight = baseClientSize.Height * 0.9f;
+
+            float scaleX = availableWidth / width;
+            float scaleY = availableHeight / height;
+
+            baseScaleFactor = Math.Min(scaleX, scaleY);
+            baseScaleFactor = Math.Max(baseScaleFactor, 0.01f);
+            baseScaleFactor = Math.Min(baseScaleFactor, 100f);
+
+            // Вычисляем базовое смещение
+            baseCenterOffset = new PointF(
+                (baseClientSize.Width - width * baseScaleFactor) / 2 - minX * baseScaleFactor,
+                (baseClientSize.Height - height * baseScaleFactor) / 2 - minY * baseScaleFactor
+            );
+        }
+
+        private void ApplyCurrentScale()
+        {
+            if (points.Count == 0 || baseClientSize == Size.Empty) return;
+
+            // Используем базовый масштаб, но пересчитываем смещение для текущего размера окна
+            scaleFactor = baseScaleFactor;
+
+            // Находим границы (аналогично CalculateBaseScaleAndOffset, но без пересчета масштаба)
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
+
+            foreach (PointF point in points)
             {
-                width = 100;
-                height = 100;
-                minX = -50;
-                minY = -50;
+                if (!float.IsNaN(point.X))
+                {
+                    minX = Math.Min(minX, point.X);
+                    maxX = Math.Max(maxX, point.X);
+                    minY = Math.Min(minY, point.Y);
+                    maxY = Math.Max(maxY, point.Y);
+                }
             }
 
-            // Добавляем безопасные отступы для случайных вариаций
-            float padding = 20f;
+            float width = maxX - minX;
+            float height = maxY - minY;
 
-            // Вычисляем масштаб с учетом отступов
-            float scaleX = (this.ClientSize.Width - 2 * padding) / width;
-            float scaleY = (this.ClientSize.Height - 2 * padding) / height;
+            if (width <= 0) width = 1;
+            if (height <= 0) height = 1;
 
-            // Берем минимальный масштаб, чтобы гарантировать помещение в окно
-            scaleFactor = Math.Min(scaleX, scaleY) * 0.95f; // Дополнительный запас 5%
+            // Добавляем такой же запас
+            float marginPercent = 0.2f;
+            float marginX = width * marginPercent;
+            float marginY = height * marginPercent;
 
-            // Ограничиваем минимальный масштаб, чтобы фрактал не был слишком мелким
-            scaleFactor = Math.Max(scaleFactor, 0.1f);
+            minX -= marginX;
+            maxX += marginX;
+            minY -= marginY;
+            maxY += marginY;
 
-            // Ограничиваем максимальный масштаб, чтобы фрактал не был слишком крупным
-            scaleFactor = Math.Min(scaleFactor, 10f);
+            width = maxX - minX;
+            height = maxY - minY;
 
-            // Вычисляем смещение для центрирования
+            // Центрируем в текущем окне с тем же масштабом
             centerOffset = new PointF(
                 (this.ClientSize.Width - width * scaleFactor) / 2 - minX * scaleFactor,
                 (this.ClientSize.Height - height * scaleFactor) / 2 - minY * scaleFactor
@@ -322,8 +378,12 @@ namespace lab5
 
         private void Form2_Resize(object sender, EventArgs e)
         {
-            CalculateScaleAndOffset();
-            this.Invalidate();
+            if (points.Count > 0)
+            {
+                // При изменении размера окна применяем текущий масштаб с новым смещением
+                ApplyCurrentScale();
+                this.Invalidate();
+            }
         }
 
         private void chkRandom_CheckedChanged(object sender, EventArgs e)

@@ -13,6 +13,11 @@ namespace lab5
         private float scaleFactor = 1.0f;
         private PointF centerOffset;
 
+        // Переменные для фиксированного масштабирования
+        private float baseScaleFactor = 1.0f;
+        private PointF baseCenterOffset;
+        private Size baseClientSize = Size.Empty;
+
         public Form3()
         {
             InitializeComponent();
@@ -33,7 +38,8 @@ namespace lab5
             if (segments.Count > 0)
             {
                 GenerateTree();
-                CalculateScaleAndOffset();
+                CalculateBaseScaleAndOffset();
+                ApplyCurrentScale();
                 this.Invalidate();
             }
         }
@@ -50,13 +56,15 @@ namespace lab5
         private void btnDraw_Click(object sender, EventArgs e)
         {
             GenerateTree();
-            CalculateScaleAndOffset();
+            CalculateBaseScaleAndOffset();
+            ApplyCurrentScale();
             this.Invalidate();
         }
 
         private void btnClear_Click(object sender, EventArgs e)
         {
             segments.Clear();
+            baseClientSize = Size.Empty;
             this.Invalidate();
         }
 
@@ -219,7 +227,7 @@ namespace lab5
             return Color.FromArgb(r, g, b);
         }
 
-        private void CalculateScaleAndOffset()
+        private void CalculateBaseScaleAndOffset()
         {
             if (segments.Count == 0) return;
 
@@ -237,51 +245,80 @@ namespace lab5
             float width = maxX - minX;
             float height = maxY - minY;
 
-            if (width <= 0 || height <= 0)
+            if (width <= 0) width = 1;
+            if (height <= 0) height = 1;
+
+            // Добавляем запас 20%
+            float marginPercent = 0.2f;
+            float marginX = width * marginPercent;
+            float marginY = height * marginPercent;
+
+            minX -= marginX;
+            maxX += marginX;
+            minY -= marginY;
+            maxY += marginY;
+
+            width = maxX - minX;
+            height = maxY - minY;
+
+            // Вычисляем базовый масштаб для размера окна при построении
+            baseClientSize = this.ClientSize;
+            float availableWidth = baseClientSize.Width * 0.9f;
+            float availableHeight = baseClientSize.Height * 0.9f;
+
+            float scaleX = availableWidth / width;
+            float scaleY = availableHeight / height;
+
+            baseScaleFactor = Math.Min(scaleX, scaleY);
+            baseScaleFactor = Math.Max(baseScaleFactor, 0.01f);
+            baseScaleFactor = Math.Min(baseScaleFactor, 50f);
+
+            // Вычисляем базовое смещение
+            baseCenterOffset = new PointF(
+                (baseClientSize.Width - width * baseScaleFactor) / 2 - minX * baseScaleFactor,
+                (baseClientSize.Height - height * baseScaleFactor) / 2 - minY * baseScaleFactor
+            );
+        }
+
+        private void ApplyCurrentScale()
+        {
+            if (segments.Count == 0 || baseClientSize == Size.Empty) return;
+
+            // Используем базовый масштаб, но пересчитываем смещение для текущего размера окна
+            scaleFactor = baseScaleFactor;
+
+            // Находим границы
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
+
+            foreach (TreeSegment segment in segments)
             {
-                width = 100;
-                height = 100;
-                minX = -50;
-                minY = -50;
+                minX = Math.Min(minX, Math.Min(segment.StartX, segment.EndX));
+                maxX = Math.Max(maxX, Math.Max(segment.StartX, segment.EndX));
+                minY = Math.Min(minY, Math.Min(segment.StartY, segment.EndY));
+                maxY = Math.Max(maxY, Math.Max(segment.StartY, segment.EndY));
             }
 
-            // Увеличиваем запас для больших деревьев и случайных углов
-            float padding = 40f;
+            float width = maxX - minX;
+            float height = maxY - minY;
 
-            // Для больших итераций увеличиваем запас
-            int iterations = (int)numIterations.Value;
-            if (iterations > 6)
-            {
-                padding = 60f;
-            }
+            if (width <= 0) width = 1;
+            if (height <= 0) height = 1;
 
-            // Если включена случайность, еще увеличиваем запас
-            if (chkRandom.Checked)
-            {
-                padding += 20f;
-            }
+            // Добавляем такой же запас
+            float marginPercent = 0.2f;
+            float marginX = width * marginPercent;
+            float marginY = height * marginPercent;
 
-            // Вычисляем масштаб с учетом отступов
-            float scaleX = (this.ClientSize.Width - 2 * padding) / width;
-            float scaleY = (this.ClientSize.Height - 2 * padding) / height;
+            minX -= marginX;
+            maxX += marginX;
+            minY -= marginY;
+            maxY += marginY;
 
-            // Берем минимальный масштаб, чтобы гарантировать помещение в окно
-            scaleFactor = Math.Min(scaleX, scaleY);
+            width = maxX - minX;
+            height = maxY - minY;
 
-            // Для больших деревьев и случайных углов увеличиваем запас масштабирования
-            float scaleMargin = 0.9f; // 10% запас по умолчанию
-            if (iterations > 6 || chkRandom.Checked)
-            {
-                scaleMargin = 0.8f; // 20% запас для сложных случаев
-            }
-
-            scaleFactor *= scaleMargin;
-
-            // Ограничиваем минимальный и максимальный масштаб
-            scaleFactor = Math.Max(scaleFactor, 0.05f); // Уменьшил минимальный масштаб
-            scaleFactor = Math.Min(scaleFactor, 10f);   // Увеличил максимальный масштаб
-
-            // Вычисляем смещение для центрирования
+            // Центрируем в текущем окне с тем же масштабом
             centerOffset = new PointF(
                 (this.ClientSize.Width - width * scaleFactor) / 2 - minX * scaleFactor,
                 (this.ClientSize.Height - height * scaleFactor) / 2 - minY * scaleFactor
@@ -315,7 +352,8 @@ namespace lab5
         {
             if (segments.Count > 0)
             {
-                CalculateScaleAndOffset();
+                // При изменении размера окна применяем текущий масштаб с новым смещением
+                ApplyCurrentScale();
                 this.Invalidate();
             }
         }
@@ -330,6 +368,8 @@ namespace lab5
                 if (segments.Count > 0)
                 {
                     GenerateTree();
+                    CalculateBaseScaleAndOffset();
+                    ApplyCurrentScale();
                     this.Invalidate();
                 }
             }
@@ -345,6 +385,8 @@ namespace lab5
                 if (segments.Count > 0)
                 {
                     GenerateTree();
+                    CalculateBaseScaleAndOffset();
+                    ApplyCurrentScale();
                     this.Invalidate();
                 }
             }
@@ -355,6 +397,8 @@ namespace lab5
             if (segments.Count > 0)
             {
                 GenerateTree();
+                CalculateBaseScaleAndOffset();
+                ApplyCurrentScale();
                 this.Invalidate();
             }
         }
