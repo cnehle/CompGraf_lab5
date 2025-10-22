@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CompGraphicsLab05.Properties
+namespace lab5.Properties
 {
 
 

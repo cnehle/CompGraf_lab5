@@ -1,18 +1,14 @@
-﻿namespace CompGraphicsLab05
+﻿namespace lab5
 {
-    partial class Form4
+    partial class Form1
     {
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.RadioButton radioButton2;
         private System.Windows.Forms.RadioButton radioButton3;
         private System.Windows.Forms.CheckBox checkBox2;
-
-
-private System.Windows.Forms.Panel leftPanel;
+        private System.Windows.Forms.Panel leftPanel;
         private System.Windows.Forms.GroupBox groupBoxMode;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
@@ -34,8 +30,6 @@ private System.Windows.Forms.Panel leftPanel;
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -50,8 +44,6 @@ private System.Windows.Forms.Panel leftPanel;
             this.leftPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(30)))), ((int)(((byte)(40)))));
             this.leftPanel.Controls.Add(this.groupBoxMode);
             this.leftPanel.Controls.Add(this.checkBox2);
-            this.leftPanel.Controls.Add(this.button2);
-            this.leftPanel.Controls.Add(this.button1);
             this.leftPanel.Controls.Add(this.label1);
             this.leftPanel.Controls.Add(this.numericUpDown1);
             this.leftPanel.Dock = System.Windows.Forms.DockStyle.Left;
@@ -94,10 +86,8 @@ private System.Windows.Forms.Panel leftPanel;
             this.radioButton2.UseVisualStyleBackColor = true;
             // 
             // radioButton1
-            //
-
-
-this.radioButton1.Location = new System.Drawing.Point(12, 20);
+            // 
+            this.radioButton1.Location = new System.Drawing.Point(12, 20);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(130, 20);
             this.radioButton1.TabIndex = 0;
@@ -113,47 +103,37 @@ this.radioButton1.Location = new System.Drawing.Point(12, 20);
             this.checkBox2.Text = "Показать полилинию";
             this.checkBox2.UseVisualStyleBackColor = true;
             // 
-            // button2 (Clear)
-            // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button2.Location = new System.Drawing.Point(14, 420);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(150, 28);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "Очистить";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // button1 (Back)
-            // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.Location = new System.Drawing.Point(14, 452);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(150, 28);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "Назад";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // label1 (marker size)
+            // label1
             // 
             this.label1.AutoSize = true;
             this.label1.ForeColor = System.Drawing.Color.LightGray;
             this.label1.Location = new System.Drawing.Point(14, 170);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(111, 13);
+            this.label1.Size = new System.Drawing.Size(143, 16);
             this.label1.TabIndex = 6;
             this.label1.Text = "Размер метки точки:";
             // 
             // numericUpDown1
             // 
             this.numericUpDown1.Location = new System.Drawing.Point(16, 190);
-            this.numericUpDown1.Minimum = new decimal(new int[] { 6, 0, 0, 0 });
-            this.numericUpDown1.Maximum = new decimal(new int[] { 42, 0, 0, 0 });
-            this.numericUpDown1.Value = new decimal(new int[] { 14, 0, 0, 0 });
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            42,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Minimum = new decimal(new int[] {
+            6,
+            0,
+            0,
+            0});
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown1.Size = new System.Drawing.Size(120, 22);
             this.numericUpDown1.TabIndex = 7;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            14,
+            0,
+            0,
+            0});
             this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
             // pictureBox1
@@ -167,21 +147,19 @@ this.radioButton1.Location = new System.Drawing.Point(12, 20);
             this.pictureBox1.TabStop = false;
             this.pictureBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseClick);
             this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
-            this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
             this.pictureBox1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseMove);
-
-
-this.pictureBox1.Resize += new System.EventHandler(this.pictureBox1_Resize);
+            this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
+            this.pictureBox1.Resize += new System.EventHandler(this.pictureBox1_Resize);
             // 
-            // Form4 (this)
+            // Form1
             // 
             this.ClientSize = new System.Drawing.Size(800, 480);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.leftPanel);
             this.MinimumSize = new System.Drawing.Size(640, 360);
-            this.Name = "Form4";
-            this.Text = "Bezier Editor — визуально изменено";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form4_FormClosing);
+            this.Name = "Form1";
+            this.Text = "Bezier Editor";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.leftPanel.ResumeLayout(false);
             this.leftPanel.PerformLayout();
             this.groupBoxMode.ResumeLayout(false);

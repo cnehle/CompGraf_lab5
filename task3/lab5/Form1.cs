@@ -3,21 +3,20 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 
-namespace CompGraphicsLab05
+namespace lab5
 {
-    public partial class Form4 : Form
+    public partial class Form1 : Form
     {
-        private Form1 _form1;
         private List<PointF> points;
         private Bitmap bmp;
 
         private PointF additionalPoint;
         private int index_of_moving_point; // индекс точки, которую будем передвигать
 
-        public Form4(Form1 form1)
+        public Form1()
         {
-            _form1 = form1;
             InitializeComponent();
             points = new List<PointF>();
             radioButton1.Checked = true; // режим добавления по умолчанию
@@ -28,14 +27,7 @@ namespace CompGraphicsLab05
             additionalPoint = new PointF();
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            // возврат на предыдущую форму
-            this.Visible = false;
-            _form1.Visible = true;
-        }
-
-        private void Form4_FormClosing(object sender, FormClosingEventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
         }
@@ -102,9 +94,7 @@ namespace CompGraphicsLab05
                 // можно подсвечивать точку при наведении
                 int hover = points.FindIndex(el => (el.X > e.X - 6) && (el.X < e.X + 6) && (el.Y > e.Y - 6) && (el.Y < e.Y + 6));
                 if (hover >= 0)
-
-
-{
+                {
                     pictureBox1.Cursor = Cursors.Hand;
                 }
                 else
@@ -196,8 +186,7 @@ namespace CompGraphicsLab05
                     }
                 }
 
-
-// 5) Рисуем опорные точки — крупные закрашенные маркеры с номером
+                // 5) Рисуем опорные точки — крупные закрашенные маркеры с номером
                 for (int i = 0; i < points.Count; i++)
                 {
                     PointF p = points[i];
