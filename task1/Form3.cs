@@ -51,6 +51,7 @@ namespace lab5
             numAngle.Value = 25;
             numLength.Value = 15;
             numThickness.Value = 5;
+            cmbTreeType.SelectedIndex = 0; // Куст по умолчанию
         }
 
         private void btnDraw_Click(object sender, EventArgs e)
@@ -81,12 +82,27 @@ namespace lab5
             Color trunkColor = btnTrunkColor.BackColor;
             Color leafColor = btnLeafColor.BackColor;
 
-            string axiom = "X";
-            Dictionary<char, string> rules = new Dictionary<char, string>
+            string axiom;
+            Dictionary<char, string> rules = new Dictionary<char, string>();
+
+            // Выбор L-системы в зависимости от типа
+            switch (cmbTreeType.SelectedIndex)
             {
-                { 'F', "FF" },
-                { 'X', "F[+X]F[-X]+X" }
-            };
+                case 0: // Куст
+                    axiom = "X";
+                    rules['F'] = "FF";
+                    rules['X'] = "F[+X]F[-X]+X";
+                    break;
+                case 1: // Дерево 4 (естественное)
+                    axiom = "X";
+                    rules['X'] = "F[@[-X]+X]";
+                    break;
+                default: // По умолчанию - куст
+                    axiom = "X";
+                    rules['F'] = "FF";
+                    rules['X'] = "F[+X]F[-X]+X";
+                    break;
+            }
 
             string lSystem = GenerateLSystem(axiom, rules, iterations);
             InterpretTree(lSystem, angle, length, thickness, trunkColor, leafColor, useRandomness);
@@ -118,8 +134,7 @@ namespace lab5
             {
                 X = 0,
                 Y = 0,
-                Angle = -90,
-                Thickness = thickness,
+                Angle = -90, // Растем вверх
                 Depth = 0
             };
 
@@ -132,15 +147,24 @@ namespace lab5
                 switch (c)
                 {
                     case 'F':
-                    case 'X':
-                        float actualStep = useRandomness ?
-                            step * (0.7f + (float)random.NextDouble() * 0.6f) : step;
+                        float actualStep = step;
 
-                        float actualAngle = useRandomness ?
-                            currentState.Angle + (float)(random.NextDouble() - 0.5) * 10 : currentState.Angle;
+                        // Для дерева 4 уменьшаем длину веток, чтобы избежать эффекта "сот"
+                        if (cmbTreeType.SelectedIndex == 1)
+                        {
+                            actualStep = step * 0.7f;
+                        }
 
-                        float endX = currentState.X + actualStep * (float)Math.Cos(actualAngle * Math.PI / 180);
-                        float endY = currentState.Y + actualStep * (float)Math.Sin(actualAngle * Math.PI / 180);
+                        if (useRandomness)
+                        {
+                            actualStep = actualStep * (0.7f + (float)random.NextDouble() * 0.6f);
+                        }
+
+                        float endX = currentState.X + actualStep * (float)Math.Cos(currentState.Angle * Math.PI / 180);
+                        float endY = currentState.Y + actualStep * (float)Math.Sin(currentState.Angle * Math.PI / 180);
+
+                        // Вычисляем толщину на основе глубины
+                        float segmentThickness = thickness * (float)Math.Pow(0.7, currentState.Depth);
 
                         // Сохраняем сегмент с информацией о глубине
                         tempSegments.Add(new TempSegment
@@ -149,7 +173,7 @@ namespace lab5
                             StartY = currentState.Y,
                             EndX = endX,
                             EndY = endY,
-                            Thickness = currentState.Thickness,
+                            Thickness = segmentThickness,
                             Depth = currentState.Depth
                         });
 
@@ -159,18 +183,23 @@ namespace lab5
 
                         currentState.X = endX;
                         currentState.Y = endY;
-                        currentState.Angle = actualAngle;
                         break;
 
                     case '+':
-                        float leftAngle = useRandomness ?
-                            angle * (0.8f + (float)random.NextDouble() * 0.4f) : angle;
+                        float leftAngle = angle;
+                        if (useRandomness)
+                        {
+                            leftAngle = angle * (0.8f + (float)random.NextDouble() * 0.4f);
+                        }
                         currentState.Angle += leftAngle;
                         break;
 
                     case '-':
-                        float rightAngle = useRandomness ?
-                            angle * (0.8f + (float)random.NextDouble() * 0.4f) : angle;
+                        float rightAngle = angle;
+                        if (useRandomness)
+                        {
+                            rightAngle = angle * (0.8f + (float)random.NextDouble() * 0.4f);
+                        }
                         currentState.Angle -= rightAngle;
                         break;
 
@@ -180,15 +209,24 @@ namespace lab5
                             X = currentState.X,
                             Y = currentState.Y,
                             Angle = currentState.Angle,
-                            Thickness = currentState.Thickness * 0.7f,
                             Depth = currentState.Depth + 1
                         });
+                        // Увеличиваем глубину для следующих сегментов
+                        currentState.Depth++;
                         break;
 
                     case ']':
                         if (stateStack.Count > 0)
                         {
                             currentState = stateStack.Pop();
+                        }
+                        break;
+
+                    case '@': // Специальный символ для случайного поворота (только для дерева 4)
+                        if (cmbTreeType.SelectedIndex == 1 && useRandomness)
+                        {
+                            float randomAngle = (float)(random.NextDouble() - 0.5) * 45;
+                            currentState.Angle += randomAngle;
                         }
                         break;
                 }
@@ -402,6 +440,17 @@ namespace lab5
                 this.Invalidate();
             }
         }
+
+        private void cmbTreeType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (segments.Count > 0)
+            {
+                GenerateTree();
+                CalculateBaseScaleAndOffset();
+                ApplyCurrentScale();
+                this.Invalidate();
+            }
+        }
     }
 
     public class TreeState
@@ -409,7 +458,6 @@ namespace lab5
         public float X { get; set; }
         public float Y { get; set; }
         public float Angle { get; set; }
-        public float Thickness { get; set; }
         public int Depth { get; set; }
     }
 
